@@ -9,15 +9,10 @@ import pandas as pd
 import requests
 from datetime import date
 from urllib.parse import urlparse
-from search_sets import search_terms
-
-# below is for testing only
-# searchTerm = ['21033',
-#               '75827'
-#               ]
-
-today = date.today()
-today = today.strftime("%m-%d-%Y")
+import search_sets
+import sqlite3
+import time
+from random import randint
 
 
 def get_data(term):
@@ -27,7 +22,7 @@ def get_data(term):
     url = f'https://www.ebay.com/sch/i.html?_from=R40&_nkw="lego"+"{term}"&_sacat=0&Packaging=Box&_dcat=19006' \
           f'&LH_ItemCondition=1000&rt=nc&LH_BIN=1 '
     r = requests.get(url)
-    print(r.status_code)
+    # print(r.status_code)
     soup = BeautifulSoup(r.text, 'html.parser')
     return soup
 
@@ -36,53 +31,58 @@ def parse(soup):
     """Returns a list of sale items for one Lego set number.
     :soup: a beautiful soup object
     """
-    productslist = []
+
     results = soup.find_all('div', {'class': 's-item__info clearfix'})
     # Had a major problem with this div, the first one was usually blank,
     # so added the first if statement. Should probably use a try except block.
     # TODO: replace if statement with try except blocks
     # TODO: add logging functionality
-    print(len(results))
-    print(type(results))
-    print(type(results[0]))
+    # print(len(results))
+    # print(type(results))
+    # print(type(results[0]))
     for item in results:
         if item.find('span', {'class': 's-item__price'}):
             price = item.find('span', {'class': 's-item__price'}).text.replace('$', '')
-            print(price)
+            # print(price)
         else:
-            price = 'null'
+            continue
         if item.find('a', {'class': 's-item__link'})['href']:
             link = item.find('a', {'class': 's-item__link'})['href']  # this is the full href
-            print(link)
+            # print(link)
             parts = urlparse(link)  # I want the item number in the href, use it as primary key in db
             directories = parts.path.strip('/').split('/')
             item_num = directories[1]
-            print(item_num)
-        product = {
-            'date': today,
-            'setID': term,
-            'link': link,
-            'item_num': item_num,  # use as primary key in db to limit repeats
-            'price': price
-        }
-        print(product)
-        productslist.append(product)
-    return productslist
+            # print(item_num)
+
+        cursor.execute('''INSERT OR IGNORE INTO ebay_prices VALUES (?, ?, ?, ?, ?)''',
+                            (item_num, term, today, price, link))
 
 
-def output(productslist, term):
-    """Saves a csv of one set number.
-    :productslist: a list of sale items for one LEgo set number
-    :term: a Lego set number
-    """
-    # TODO: replace writing to csv with writing to a database
-    productsdf = pd.DataFrame(productslist)
-    productsdf.to_csv(f'LEGO{term}_{today}.csv', index=False)
-    print("Saved to csv")
-    return
+# To calculate how long script runs we need time now
+start_time = time.time()
+# Also need date for db entries
+today = date.today()
+today = today.strftime("%m-%d-%Y")
 
+# Create list of sets to loop over
+search_terms = search_sets.create_search_list()
+
+# Create connection to db and a cursor to execute commands
+connection = sqlite3.connect('lego.db')
+cursor = connection.cursor()
 
 for term in search_terms:
+    rows_before = int(cursor.execute('''SELECT * FROM ebay_prices'''))
+    print(f"Records before insertion: {rows_before}")
     soup = get_data(term)
     productslist = parse(soup)
-    output(productslist, term)
+    time.sleep(randint(0,2))
+    rows_after = int(cursor.execute('''SELECT * FROM ebay_prices'''))
+    print(f"Records after insertion: {rows_after}")
+    print("Total rows added: " + rows_after - rows_before)
+
+connection.commit()
+connection.close()
+
+end_time = time.time()
+print("Execution time is: ", end_time-start_time)
