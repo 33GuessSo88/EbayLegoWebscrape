@@ -13,6 +13,7 @@ import search_sets
 import sqlite3
 import time
 from random import randint
+from send_sms import send_message
 
 
 def get_data(term):
@@ -72,17 +73,20 @@ connection = sqlite3.connect('lego.db')
 cursor = connection.cursor()
 
 for term in search_terms:
-    rows_before = int(cursor.execute('''SELECT * FROM ebay_prices'''))
+    rows_before = cursor.execute('''SELECT * FROM ebay_prices''')
+    rows_before = len(rows_before.fetchall())
     print(f"Records before insertion: {rows_before}")
     soup = get_data(term)
     productslist = parse(soup)
     time.sleep(randint(0,2))
-    rows_after = int(cursor.execute('''SELECT * FROM ebay_prices'''))
+    rows_after = cursor.execute('''SELECT * FROM ebay_prices''')
+    rows_after = len(rows_after.fetchall())
     print(f"Records after insertion: {rows_after}")
-    print("Total rows added: " + rows_after - rows_before)
+    print("Total rows added: ", rows_after - rows_before)
 
 connection.commit()
 connection.close()
 
 end_time = time.time()
 print("Execution time is: ", end_time-start_time)
+send_message()
