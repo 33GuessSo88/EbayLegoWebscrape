@@ -5,7 +5,6 @@ and save the data in a csv for each set
 """
 
 from bs4 import BeautifulSoup
-import pandas as pd
 import requests
 from datetime import date
 from urllib.parse import urlparse
@@ -56,7 +55,7 @@ def parse(soup):
             # print(item_num)
 
         cursor.execute('''INSERT OR IGNORE INTO ebay_prices VALUES (?, ?, ?, ?, ?)''',
-                            (item_num, term, today, price, link))
+                       (item_num, term, today, price, link))
 
 
 # To calculate how long script runs we need time now
@@ -72,21 +71,29 @@ search_terms = search_sets.create_search_list()
 connection = sqlite3.connect('lego.db')
 cursor = connection.cursor()
 
+initital_rows = cursor.execute('''SELECT * FROM ebay_prices''')
+initital_rows = len(initital_rows.fetchall())
+
 for term in search_terms:
     rows_before = cursor.execute('''SELECT * FROM ebay_prices''')
     rows_before = len(rows_before.fetchall())
     print(f"Records before insertion: {rows_before}")
     soup = get_data(term)
     productslist = parse(soup)
-    time.sleep(randint(0,2))
+    time.sleep(randint(0, 2))
     rows_after = cursor.execute('''SELECT * FROM ebay_prices''')
     rows_after = len(rows_after.fetchall())
     print(f"Records after insertion: {rows_after}")
     print("Total rows added: ", rows_after - rows_before)
 
+final_rows = cursor.execute('''SELECT * FROM ebay_prices''')
+final_rows = len(final_rows.fetchall())
+
+new_rows = final_rows - initital_rows
+
 connection.commit()
 connection.close()
 
 end_time = time.time()
-print("Execution time is: ", end_time-start_time)
-send_message()
+print("Execution time is: ", end_time - start_time)
+send_message(new_rows)
