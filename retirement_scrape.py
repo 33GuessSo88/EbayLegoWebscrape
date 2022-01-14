@@ -6,11 +6,16 @@ This script will take a list of lego sets and scrape brickset for retirement dat
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
+import sqlite3
 
 list_of_sets = [2235, 2236]
 
+feature_info = pd.DataFrame()
+columns = []
+values = []
 
 for set_num in list_of_sets:
+    new_values = []
     url = f'https://brickset.com/sets/{set_num}'
     page = requests.get(url)
 
@@ -18,49 +23,27 @@ for set_num in list_of_sets:
 
     info = soup.find_all("section", {'class': 'featurebox'})
 
-    feature_info = pd.DataFrame()
-
-    cleaned_id_text = []
     for i in info[0].find_all('dt'):
-        cleaned_id_text.append(i.text)
-    print(cleaned_id_text)
-    new_list = [y for x in cleaned_id_text for y in x.split('/')]
-    even_newer_list = [i.strip() if type(i) == str else str(i) for i in new_list]
-    print(even_newer_list)
-    # print(cleaned_id_text)
+        columns.append(i.text)
 
-    cleaned_id_value_text = []
     for i in info[0].find_all('dd'):
-        cleaned_id_value_text.append(i.text)
-    print(cleaned_id_value_text)
-    # Can't figure out how to only split at index 7
-    new_values = [y for x in cleaned_id_value_text for y in x.split('-', 1)]
-    print(new_values)
-    # Shit, this was tough. Had to join the first split back together
-    new_values[0:2] = ['-'.join(new_values[0:2])]
-    # lists are immutable, so need to create new list name
-    even_newer_values = [i.strip() if type(i) == str else str(i) for i in new_values]
-    print(even_newer_values)
+        new_values.append(i.text)
+    # Split all elements of new_values at ' - ' to separate Launch Exit dates
+    # This also split age from to so I just added another column, too hard to concatenate
+    values2 = []
+    for i in new_values:
+        values2 += i.split(' - ')
+    # Split set number to remove -1
+    values2 = [i.split('-', 1)[0] for i in values2]
+    values.append(values2)
 
-    feature_info['Id'] = cleaned_id_text
-    feature_info['Value'] = cleaned_id_value_text
-    print(feature_info)
-    feature_info.set_index('Id', inplace=True)
-    # Transpose rows to colums
-    feature_info_t = feature_info.T
-    print(feature_info_t)
-    for col in feature_info_t:
-        print(col)
-    feature_info_t.drop(columns=['Tags', 'Current value', 'Price per piece', 'Weight',
-                                 'Dimensions', 'Barcodes', 'LEGO item numbers'],
-                        inplace=True)
-    print(feature_info_t)
-    # split Launch/exit into 2 columns
-    # I think exit is a special word, need to replace it
-    feature_info_t.columns = feature_info_t.columns.str.replace('/', '_')
-    feature_info_t.columns = feature_info_t.columns.str.replace('exit', 'retirement')
-    print(feature_info_t['Launch_retirement'])
-    feature_info_t[['Launch Date', 'Retirement Date']] = feature_info_t.Launch_retirement.str.split(' - ', expand=True)
-    feature_info_t = feature_info_t['Rating'].str.split().str[1]
-    print(feature_info_t)
+print(columns)
+print(values)
 
+connection = sqlite3.connect('lego.db')
+cursor = connection.cursor()
+
+sql_statement = 'INSERT INTO details VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+cursor.executemany(sql_statement, values)
+connection.commit()
+connection.close()
