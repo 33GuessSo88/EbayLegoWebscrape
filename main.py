@@ -12,7 +12,8 @@ import search_sets
 import sqlite3
 import time
 from random import randint
-from send_sms import send_message
+from send_sms import send_finished_sms
+from send_sms import send_inititate_sms
 
 
 def get_data(term):
@@ -64,6 +65,9 @@ start_time = time.time()
 today = date.today()
 today = today.strftime("%m-%d-%Y")
 
+# send initiation sms
+send_inititate_sms()
+
 # Create list of sets to loop over
 search_terms = search_sets.create_search_list()
 
@@ -96,4 +100,4 @@ connection.close()
 
 end_time = time.time()
 print("Execution time is: ", end_time - start_time)
-send_message(new_rows)
+send_finished_sms(new_rows)
