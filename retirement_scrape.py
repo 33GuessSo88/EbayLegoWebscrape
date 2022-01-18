@@ -7,14 +7,21 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 import sqlite3
+import time
+from random import randint
+import search_sets
 
-list_of_sets = [2235, 2236]
+# Create list of sets to loop over
+list_of_sets = search_sets.create_search_list()
+# list_of_sets = [2235, 2236]
 
 feature_info = pd.DataFrame()
 columns = []
 values = []
 
 for set_num in list_of_sets:
+    time.sleep(randint(6, 20))
+    print(set_num)
     new_values = []
     url = f'https://brickset.com/sets/{set_num}'
     page = requests.get(url)
@@ -37,13 +44,22 @@ for set_num in list_of_sets:
     values2 = [i.split('-', 1)[0] for i in values2]
     values.append(values2)
 
-print(columns)
-print(values)
+# print(columns)
+# print(values)
 
 connection = sqlite3.connect('lego.db')
 cursor = connection.cursor()
 
-sql_statement = 'INSERT INTO details VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+initital_rows = cursor.execute('''SELECT * FROM details''')
+initital_rows = len(initital_rows.fetchall())
+print(f'Initial rows: {initital_rows}')
+
+sql_statement = 'INSERT OR IGNORE INTO details VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
 cursor.executemany(sql_statement, values)
 connection.commit()
+
+final_rows = cursor.execute('''SELECT * FROM details''')
+final_rows = len(final_rows.fetchall())
+print(f"Final rows: {final_rows}")
+
 connection.close()
