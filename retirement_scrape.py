@@ -10,12 +10,15 @@ import sqlite3
 import time
 from random import randint
 import search_sets
+import logging
+
+logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR)
 
 # Create list of sets to loop over
 list_of_sets = search_sets.create_search_list()
-# list_of_sets = [2235, 2236]
+# list_of_sets = [60009, 60010]
 
-feature_info = pd.DataFrame()
+# feature_info = pd.DataFrame()
 columns = []
 values = []
 
@@ -30,19 +33,25 @@ for set_num in list_of_sets:
 
     info = soup.find_all("section", {'class': 'featurebox'})
 
-    for i in info[0].find_all('dt'):
-        columns.append(i.text)
+    try:
+        for i in info[0].find_all('dt'):
+            columns.append(i.text)
+    except:
+        logging.error(f"Problem found in set {set_num}")
 
-    for i in info[0].find_all('dd'):
-        new_values.append(i.text)
-    # Split all elements of new_values at ' - ' to separate Launch Exit dates
-    # This also split age from to so I just added another column, too hard to concatenate
-    values2 = []
-    for i in new_values:
-        values2 += i.split(' - ')
-    # Split set number to remove -1
-    values2 = [i.split('-', 1)[0] for i in values2]
-    values.append(values2)
+    try:
+        for i in info[0].find_all('dd'):
+            new_values.append(i.text)
+        # Split all elements of new_values at ' - ' to separate Launch Exit dates
+        # This also split age from to so I just added another column, too hard to concatenate
+        values2 = []
+        for i in new_values:
+            values2 += i.split(' - ')
+        # Split set number to remove -1
+        values2 = [i.split('-', 1)[0] for i in values2]
+        values.append(values2)
+    except:
+        pass
 
 # print(columns)
 # print(values)
