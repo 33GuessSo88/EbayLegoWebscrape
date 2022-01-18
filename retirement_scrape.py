@@ -16,9 +16,8 @@ logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR
 
 # Create list of sets to loop over
 list_of_sets = search_sets.create_search_list()
-# list_of_sets = [60009, 60010]
+# list_of_sets = [60009, 60010] # for testing
 
-# feature_info = pd.DataFrame()
 columns = []
 values = []
 
