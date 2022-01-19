@@ -4,7 +4,6 @@ This script will take a list of lego sets and scrape brickset for retirement dat
 """
 
 from bs4 import BeautifulSoup
-import pandas as pd
 import requests
 import sqlite3
 import time
@@ -16,57 +15,82 @@ logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR
 
 # Create list of sets to loop over
 list_of_sets = search_sets.create_search_list()
-# list_of_sets = [60009, 60010] # for testing
+# list_of_sets = [60009, 60010, 60012, 75975]  # for testing
 
-columns = []
-values = []
+dict_keys = ['Set number', 'Name', 'Theme group', 'Theme', 'Subtheme', 'Year released', 'Launch/exit',
+             'Pieces', 'Minifigs', 'Designer', 'RRP', 'Age range', 'Packaging', 'Availability', 'Rating']
 
-for set_num in list_of_sets:
-    time.sleep(randint(6, 20))
-    print(set_num)
-    new_values = []
-    url = f'https://brickset.com/sets/{set_num}'
-    page = requests.get(url)
 
-    soup = BeautifulSoup(page.text, "html.parser")
+def get_dl(soup):
+    keys, values = [], []
+    for section in soup.find_all("section", {'class': 'featurebox'}):
+        for dl in section.find_all("dl"):
+            for dt in dl.find_all("dt"):
+                keys.append(dt.text.strip())
+            for dd in dl.find_all("dd"):
+                values.append(dd.text.strip())
+            return dict(zip(keys, values))
 
-    info = soup.find_all("section", {'class': 'featurebox'})
-
-    try:
-        for i in info[0].find_all('dt'):
-            columns.append(i.text)
-    except:
-        logging.error(f"Problem found in set {set_num}")
-
-    try:
-        for i in info[0].find_all('dd'):
-            new_values.append(i.text)
-        # Split all elements of new_values at ' - ' to separate Launch Exit dates
-        # This also split age from to so I just added another column, too hard to concatenate
-        values2 = []
-        for i in new_values:
-            values2 += i.split(' - ')
-        # Split set number to remove -1
-        values2 = [i.split('-', 1)[0] for i in values2]
-        values.append(values2)
-    except:
-        pass
-
-# print(columns)
-# print(values)
-
+# Create connection to database
 connection = sqlite3.connect('lego.db')
 cursor = connection.cursor()
 
-initital_rows = cursor.execute('''SELECT * FROM details''')
+# count initial rows in db before we make changes
+initital_rows = cursor.execute('''SELECT * FROM set_details''')
 initital_rows = len(initital_rows.fetchall())
 print(f'Initial rows: {initital_rows}')
 
-sql_statement = 'INSERT OR IGNORE INTO details VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-cursor.executemany(sql_statement, values)
+for set_num in list_of_sets:
+    try:
+        time.sleep(randint(3, 10))
+        print(set_num)
+        url = f'https://brickset.com/sets/{set_num}'
+        page = requests.get(url)
+
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        set_dict = get_dl(soup)
+
+        # Check list of dictionary keys, if it doesn't exist, add it with value None
+        for key in dict_keys:
+            if key not in set_dict:
+                set_dict[key] = None
+        # print(set_dict)
+
+        # filter dictionary to only keys in dict_keys list for easy SQL insertion
+        filtered_dict = {}
+        for key, value in set_dict.items():
+            if key in dict_keys:
+                filtered_dict[key] = value
+        # print(filtered_dict)
+        # print(len(filtered_dict))
+
+        # write one set of data to database, but only one commit after the for loop
+        cursor.execute("INSERT OR IGNORE INTO set_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                       [filtered_dict["Set number"],
+                        filtered_dict["Name"],
+                        filtered_dict["Theme group"],
+                        filtered_dict["Theme"],
+                        filtered_dict["Subtheme"],
+                        filtered_dict["Year released"],
+                        filtered_dict["Launch/exit"],
+                        filtered_dict["Pieces"],
+                        filtered_dict["Minifigs"],
+                        filtered_dict["Designer"],
+                        filtered_dict["RRP"],
+                        filtered_dict["Age range"],
+                        filtered_dict["Packaging"],
+                        filtered_dict["Availability"],
+                        filtered_dict["Rating"]
+                        ]
+                       )
+    except:
+        pass
+# commit all changes to db
 connection.commit()
 
-final_rows = cursor.execute('''SELECT * FROM details''')
+# find number of rows in db after commit
+final_rows = cursor.execute('''SELECT * FROM set_details''')
 final_rows = len(final_rows.fetchall())
 print(f"Final rows: {final_rows}")
 
