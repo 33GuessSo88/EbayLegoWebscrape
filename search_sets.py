@@ -23,5 +23,4 @@ def create_search_list():
 
 # print(search_terms)
 
-# TODO: this should probably be a function that returns search_terms[]
 # TODO: Go to brickset.com every 3 months and grab a new set of set numbers.
