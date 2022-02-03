@@ -31,6 +31,7 @@ def get_dl(soup):
                 values.append(dd.text.strip())
             return dict(zip(keys, values))
 
+
 # Create connection to database
 connection = sqlite3.connect('lego.db')
 cursor = connection.cursor()
