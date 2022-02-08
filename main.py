@@ -88,7 +88,7 @@ for term in search_terms:
     rows_after = cursor.execute('''SELECT * FROM ebay_prices''')
     rows_after = len(rows_after.fetchall())
     print(f"Records after insertion: {rows_after}")
-    print("Total rows added: ", rows_after - rows_before)
+    print(f"Total rows added for set {term}: ", rows_after - rows_before)
 
 final_rows = cursor.execute('''SELECT * FROM ebay_prices''')
 final_rows = len(final_rows.fetchall())
