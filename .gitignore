@@ -5,3 +5,7 @@
 /retirement.log
 /send_sms.py
 /.env.bat
+/Data
+/Images
+/venv
+/__pycache__
