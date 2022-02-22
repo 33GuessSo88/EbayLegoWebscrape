@@ -10,7 +10,7 @@ def create_search_list():
     import csv
 
     search_terms = []
-    search_file = 'All_sets_2021.csv'
+    search_file = 'list_of_all_sets.csv'
 
     with open(search_file, newline='') as csvfile:
         for row in csv.reader(csvfile):
@@ -18,9 +18,9 @@ def create_search_list():
 
     # Remove duplicates
     search_terms = list(dict.fromkeys(search_terms))
+
+    # print(search_terms)
     return search_terms
 
-
-# print(search_terms)
 
 # TODO: Go to brickset.com every 3 months and grab a new set of set numbers.
