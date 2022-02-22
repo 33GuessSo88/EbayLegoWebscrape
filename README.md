@@ -1,7 +1,14 @@
 # EbayLegoWebscrape
 ## Lego webscraper for Ebay
 
-Sold a set on Ebay for a **3X in 4 years.**  
+I had a LEGO set I bought a couple years ago as an "investment".
+It was a bit of an experiment, I hadn't really done any research but I knew certain sets sold for way over list on ebay after they had retired.
+I held the set for 3 years, it sat in a closet and then I decided to sell it.
+I sold it on ebay for almost 3 times what I paid for it. It was the Ghostbusters Firestation set.
+
+I lost my job as a geologist recently and always wanted to learn to code, so this is a personal project I'm working on as I learn python and a little SQL.
+
+Can I predict what sets will return the largest appreciation?
 Wondered what set characteristics make for a good investment - theme? size? figurines?  
 Time - is there a sweet spot in terms of ROI vs time since set retirement?
 
