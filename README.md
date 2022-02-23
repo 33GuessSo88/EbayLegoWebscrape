@@ -6,7 +6,7 @@ It was a bit of an experiment, I hadn't really done any research but I knew cert
 I held the set for 3 years, it sat in a closet and then I decided to sell it.
 I sold it on ebay for almost 3 times what I paid for it. It was the Ghostbusters Firestation set.
 
-I lost my job as a geologist recently and always wanted to learn to code, so this is a personal project I'm working on as I learn python and a little SQL.
+I always wanted to learn to code, so this is a personal project I'm working on as I learn python and a little SQL.
 
 Can I predict what sets will return the largest appreciation?
 Wondered what set characteristics make for a good investment - theme? size? figurines?  
