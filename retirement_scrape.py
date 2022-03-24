@@ -15,7 +15,7 @@ logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR
 
 # Create list of sets to loop over
 list_of_sets = search_sets.create_search_list()
-# list_of_sets = [60009, 60010, 60012, 75975]  # for testing
+# list_of_sets = [76905]  # for testing
 
 dict_keys = ['Set number', 'Name', 'Theme group', 'Theme', 'Subtheme', 'Year released', 'Launch/exit',
              'Pieces', 'Minifigs', 'Designer', 'RRP', 'Age range', 'Packaging', 'Availability', 'Rating']
