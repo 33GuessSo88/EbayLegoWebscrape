@@ -163,3 +163,4 @@ cython_debug/
 #.idea/
 list_of_all_sets.csv
 Data Analysis/final_cleaned_df.csv
+lego_database_copy_3_24_22.db
