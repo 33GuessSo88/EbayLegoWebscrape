@@ -1,6 +1,9 @@
-""" This file grabs the brickset_set_nums table from the lego.db
-and parses out the set_num in a clean format
-and then saves as a csv for search_set.py to use
+""" 
+- Creates a connection to the db
+- Extracts the column SetNum where pieces>1 as a dataframe
+- removes -1 from set num
+- saves as csv to be used later by search_sets.py
+
 """
 
 import sqlite3
@@ -17,6 +20,8 @@ query1 = ''' SELECT DISTINCT SetNum
 
 df = pd.read_sql_query(query1, connection)
 # print(df)
+
+connection.close()
 
 # remove -1 from set_num
 df['SetNum'] = df['SetNum'].str.split('-', n=1).str[0]
