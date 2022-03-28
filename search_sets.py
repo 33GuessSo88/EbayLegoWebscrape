@@ -7,6 +7,9 @@
 """
 
 
+from venv import create
+
+
 def create_search_list():
 
     import pandas as pd
@@ -33,8 +36,15 @@ def create_search_list():
 
     # Remove duplicates
     search_terms = list(dict.fromkeys(search_terms))
+    search_terms.sort(reverse=True)
+    # print(search_terms)
+    # print(len(search_terms))
+
 
     return search_terms
 
+
+
 # TODO: Go to brickset.com every 3 months and grab a new set of set numbers.
 
+# create_search_list()
