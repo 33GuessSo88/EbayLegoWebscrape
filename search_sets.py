@@ -7,7 +7,6 @@
 """
 
 
-from venv import create
 
 
 def create_search_list():
