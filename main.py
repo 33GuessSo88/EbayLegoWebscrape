@@ -12,6 +12,7 @@ import search_sets
 import sqlite3
 import time
 from random import randint
+
 # from send_sms import send_finished_sms
 # from send_sms import send_inititate_sms
 
@@ -78,17 +79,18 @@ cursor = connection.cursor()
 initital_rows = cursor.execute('''SELECT * FROM ebay_prices''')
 initital_rows = len(initital_rows.fetchall())
 
+total_new_rows = 0
+
 for term in search_terms:
     rows_before = cursor.execute('''SELECT * FROM ebay_prices''')
     rows_before = len(rows_before.fetchall())
-    print(f"Records before insertion: {rows_before}")
     soup = get_data(term)
     productslist = parse(soup)
     time.sleep(randint(0, 2))
     rows_after = cursor.execute('''SELECT * FROM ebay_prices''')
     rows_after = len(rows_after.fetchall())
-    print(f"Records after insertion: {rows_after}")
-    print(f"Total rows added for set {term}: ", rows_after - rows_before)
+    total_new_rows += 1
+    print(f"Set: {term}, New Rows: {rows_after - rows_before}, Total New Rows: {total_new_rows}")
 
 final_rows = cursor.execute('''SELECT * FROM ebay_prices''')
 final_rows = len(final_rows.fetchall())
@@ -99,5 +101,9 @@ connection.commit()
 connection.close()
 
 end_time = time.time()
+print(f'New entrie: {new_rows}')
 print("Execution time is: ", end_time - start_time)
 # send_finished_sms(new_rows)
+
+# TODO need to run the notebook so I can write ebay no outiers to db for power bi
+# probably need to create a function of the notebook or somehow run the notebook automatically.
