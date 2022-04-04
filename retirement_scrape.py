@@ -11,11 +11,11 @@ from random import randint
 import search_sets
 import logging
 
-logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR)
+# logging.basicConfig(filename='retirement.log', filemode='a', level=logging.ERROR)
 
 # Create list of sets to loop over
 list_of_sets = search_sets.create_search_list()
-# list_of_sets = [76905]  # for testing
+# list_of_sets = [76905, 41130, 75043, 9472]  # for testing
 
 dict_keys = ['Set number', 'Name', 'Theme group', 'Theme', 'Subtheme', 'Year released', 'Launch/exit',
              'Pieces', 'Minifigs', 'Designer', 'RRP', 'Age range', 'Packaging', 'Availability', 'Rating']
@@ -67,7 +67,7 @@ for set_num in list_of_sets:
         # print(len(filtered_dict))
 
         # write one set of data to database, but only one commit after the for loop
-        cursor.execute("INSERT OR IGNORE INTO set_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        cursor.execute("REPLACE INTO set_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                        [filtered_dict["Set number"],
                         filtered_dict["Name"],
                         filtered_dict["Theme group"],
